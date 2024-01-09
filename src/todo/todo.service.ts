@@ -1,4 +1,4 @@
-import { Body, Injectable, NotFoundException, Post } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient, Todo } from '@prisma/client';
 
 import CreateTodoDto from './dto/createTodo.dto';
@@ -27,7 +27,7 @@ export class TodoService {
     if (!todo) {
       throw new NotFoundException(`未找到！`);
     }
-    throw new NotFoundException(`未找到！`);
+    console.log(todo);
     return todo;
   }
 
@@ -62,7 +62,7 @@ export class TodoService {
     });
   }
 
-  async deleteTodo(id: number): Promise<Todo> {
+  deleteTodo(id: number): Promise<Todo> {
     return this.prisma.todo.delete({
       where: {
         id: id,

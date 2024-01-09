@@ -7,11 +7,15 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
+  ParseIntPipe,
   Post,
   Put,
+  UseFilters,
 } from '@nestjs/common';
 import { TodoService } from '@/todo/todo.service';
 import CreateTodoDto from '@/todo/dto/createTodo.dto';
+import UpdateTodoDto from '@/todo/dto/updateTodo.dto';
+import { NotFoundExceptionFilter } from '@/core/filter/notFoundException/notFoundException.filter';
 
 @Controller('todo')
 export class TodoController {
@@ -25,7 +29,7 @@ export class TodoController {
   @Get(':id')
   async getTodo(@Param('id') id: string) {
     try {
-      await this.todoService.getTodo(id);
+      return await this.todoService.getTodo(id);
     } catch (error) {
       if (error instanceof NotFoundException) {
         // 处理资源未找到的情况，返回适当的响应
@@ -45,16 +49,20 @@ export class TodoController {
 
   @Put(':id')
   updateTodo(
-    @Param('id') id: number,
-    @Body('status') status: number,
-    @Body('content') content: string,
-    @Body('title') title: string,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateTodoDto: UpdateTodoDto,
   ) {
+    const { status, content, title } = updateTodoDto;
     return this.todoService.updateTodo(id, status, content, title);
   }
 
   @Delete(':id')
-  deleteTodo(@Param('id') id: number) {
-    return this.todoService.deleteTodo(id);
+  @UseFilters(NotFoundExceptionFilter)
+  async deleteTodo(@Param('id') id: number) {
+    try {
+      await this.todoService.deleteTodo(id);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
